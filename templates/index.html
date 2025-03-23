@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mental Health Chatbot</title>
+
+    <style>
+        /* Global Styles */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: rgb(0, 0, 0);
+        }
+
+        /* Main Container */
+        .container {
+            display: flex;
+            width: 90%;
+            max-width: 1000px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 30%;
+            background: #5a0fc8;
+            padding: 20px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .sidebar h3 {
+            margin-bottom: 15px;
+        }
+
+        #history-list {
+            width: 100%;
+            list-style: none;
+            padding: 0;
+        }
+
+        #history-list li {
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.2);
+            margin-bottom: 8px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            transition: 0.3s;
+        }
+
+        #history-list li:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        .logout-btn {
+            margin-top: 15px;
+            padding: 12px;
+            background: white;
+            color: #6a11cb;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #fff;
+            color: #2575fc;
+        }
+
+        /* Chat Section */
+        .chat-container {
+            width: 70%;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        h2 {
+            text-align: center;
+            color: #6a11cb;
+        }
+
+        /* Chat History */
+        #chat-history, #chat-box {
+            max-height: 250px;
+            overflow-y: auto;
+            padding: 15px;
+            border-radius: 10px;
+            background: #f4f4f4;
+        }
+
+        /* Messages */
+        .user-message, .bot-message {
+            padding: 10px;
+            border-radius: 8px;
+            margin: 8px 0;
+            display: inline-block;
+            max-width: 80%;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .user-message {
+            background: #00070e;
+            text-align: right;
+            align-self: flex-end;
+            color: white;
+        }
+
+        .bot-message {
+            background: #ffffff; /* Light background */
+            text-align: left;
+            align-self: flex-start;
+            color: black; /* Changed text color to black */
+        }
+
+        /* Typing Indicator */
+        .typing-indicator {
+            display: none;
+            color: gray;
+            font-style: italic;
+        }
+
+        /* Input Box */
+        .input-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        input {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 12px 18px;
+            background: #6a11cb;
+            color: rgb(255, 248, 248);
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: #2575fc;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                width: 95%;
+            }
+
+            .sidebar, .chat-container {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar for Chat History -->
+        <div class="sidebar">
+            <h3>📜 Chat History</h3>
+            <ul id="history-list"></ul> <!-- Dates will be loaded here -->
+            <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+        </div>
+
+        <!-- Main Chat Interface -->
+        <div class="chat-container">
+            <h2>💙 Welcome!</h2>
+            <div id="chat-history"></div> <!-- Conversation for selected date -->
+            <div id="chat-box"></div> <!-- New Messages -->
+            
+            <div class="input-container">
+                <input type="text" id="user-input" placeholder="Type your message..." onkeypress="handleKeyPress(event)">
+                <button onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            fetchChatHistory();
+        });
+
+        async function fetchChatHistory() {
+            let response = await fetch("/history");
+            let data = await response.json();
+            let historyList = document.getElementById("history-list");
+            historyList.innerHTML = "";
+
+            for (let date in data) {
+                let listItem = document.createElement("li");
+                listItem.textContent = date;
+                listItem.onclick = () => displayConversation(date, data[date]);
+                historyList.appendChild(listItem);
+            }
+        }
+
+        function displayConversation(date, messages) {
+            let chatHistory = document.getElementById("chat-history");
+            chatHistory.innerHTML = `<h3>📅 ${date}</h3>`;
+
+            messages.forEach(msg => {
+                chatHistory.innerHTML += `<div class="user-message"><b>🧑 (${msg.time}):</b> ${msg.user_message}</div>`;
+                chatHistory.innerHTML += `<div class="bot-message"><b>🤖 (${msg.time}):</b> ${msg.bot_response}</div>`;
+            });
+        }
+
+        async function sendMessage() {
+            let userMessage = document.getElementById("user-input").value;
+            if (!userMessage.trim()) return;
+
+            let chatBox = document.getElementById("chat-box");
+            chatBox.innerHTML += `<div class="user-message">🧑 You: ${userMessage}</div>`;
+
+            let response = await fetch("/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: userMessage })
+            });
+
+            let data = await response.json();
+            chatBox.innerHTML += `<div class="bot-message">🤖 Bot: ${data.bot_response}</div>`;
+
+            document.getElementById("user-input").value = "";
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === "Enter") {
+                sendMessage();
+            }
+        }
+    </script>
+</body>
+</html>
