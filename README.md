@@ -84,9 +84,6 @@ Python version used in development: 3.12.6
 3. Run app.py after all the pre-requisites are installed and running in the background.
 
 ## Code Components:
-Here's the revised version with explicit step-by-step workflow descriptions and corresponding Mermaid diagrams:
-
----
 
 **1. get_user_files**  
 *Workflow Steps*:  
