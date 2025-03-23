@@ -247,10 +247,121 @@ graph TD
 ```mermaid
 graph TD
     A[Start] --> B[Build prompt]
-    B --> C[Call Ollama API]
+    B --> C[Call Model API]
     C --> D[Parse response]
     D --> E[Return text]
 ```
 
 ---
+Here's the complete end-to-end workflow description and diagram for the mental health chatbot application:
+
+---
+
+### **Overall Workflow**  
+**1. User Access**  
+- User visits application URL  
+- Redirected to login/signup page if unauthenticated  
+
+**2. Authentication**  
+- *New Users*:  
+  1. Submit signup form  
+  2. System hashes password with bcrypt  
+  3. Creates MongoDB user record  
+  4. Redirects to login  
+- *Existing Users*:  
+  1. Submit login credentials  
+  2. System verifies password hash  
+  3. Creates Flask-Login session  
+
+**3. Chat Interaction**  
+1. User submits message via UI  
+2. System immediately checks for crisis keywords:  
+   - **If crisis detected**: Returns emergency resources template  
+   - **If safe**: Proceeds with normal processing  
+
+**4. Context Retrieval**  
+1. Loads user-specific FAISS index  
+2. Generates embedding for current message  
+3. Performs similarity search on historical vectors  
+4. Retrieves relevant context from message store  
+
+**5. Response Generation**  
+1. Formats prompt with:  
+   - System instructions (SUPPORTIVE_PROMPT)  
+   - Retrieved context  
+   - Current message  
+2. Calls Ollama API with formatted prompt  
+3. Processes AI response  
+
+**6. Data Storage**  
+1. Stores conversation in MongoDB:  
+   - User ID  
+   - Timestamp  
+   - Message/response pair  
+2. Updates FAISS index with new embeddings  
+3. Appends raw text to message store file  
+
+**7. Response Delivery**  
+- Returns formatted response to UI  
+- Updates chat history display  
+
+---
+
+### **End-to-End Workflow Diagram**  
+```mermaid
+graph TD
+    A[User] --> B[Access Application]
+    B --> C{Authenticated?}
+    C -->|No| D[Signup/Login]
+    D --> E[Create/Verify Account]
+    E --> F[Chat Interface]
+    C -->|Yes| F
+    F --> G[Send Message]
+    G --> H{Crisis Detected?}
+    H -->|Yes| I[Return Emergency Resources]
+    H -->|No| J[Retrieve Context]
+    J --> K[Generate AI Response]
+    K --> L[Store Conversation]
+    L --> M[Update Vector Index]
+    M --> N[Display Response]
+    N --> G
+```
+
+---
+
+##**Data Flow**:  
+```mermaid
+graph LR
+    UI -->|Message| Auth
+    Auth -->|Session| ChatEngine
+    ChatEngine -->|Query| VectorSystem
+    VectorSystem -->|Context| ChatEngine
+    ChatEngine -->|Prompt| AIModel
+    AIModel -->|Response| ChatEngine
+    ChatEngine -->|Save| Database
+    ChatEngine -->|Update| VectorSystem
+    Database -->|History| UI
+```
+
+---
+
+
+1. **User** initiates session through browser  
+2. **Flask** handles routing and template rendering  
+3. **MongoDB** persists:  
+   - User credentials (bcrypt hashed)  
+   - Timestamped chat history  
+4. **FAISS** + Text Files maintain:  
+   - Conversation embeddings for context  
+   - Raw message history for retrieval  
+5. **Ollama** processes:  
+   - Crisis detection bypass logic  
+   - Context-aware response generation  
+6. **Security** ensured through:  
+   - Session management (Flask-Login)  
+   - Password hashing (bcrypt)  
+   - User-specific data isolation  
+
+---
+
 
