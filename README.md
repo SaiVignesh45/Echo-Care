@@ -250,9 +250,6 @@ graph TD
 ```
 
 ---
-Here's the complete end-to-end workflow description and diagram for the mental health chatbot application:
-
----
 
 ### **Overall Workflow**  
 **1. User Access**  
