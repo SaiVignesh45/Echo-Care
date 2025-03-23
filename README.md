@@ -305,9 +305,7 @@ Here's the complete end-to-end workflow description and diagram for the mental h
 - Returns formatted response to UI  
 - Updates chat history display  
 
----
 
-### **End-to-End Workflow Diagram**  
 ```mermaid
 graph TD
     A[User] --> B[Access Application]
@@ -343,8 +341,6 @@ graph LR
     Database -->|History| UI
 ```
 
----
-
 
 1. **User** initiates session through browser  
 2. **Flask** handles routing and template rendering  
@@ -365,3 +361,13 @@ graph LR
 ---
 
 
+## Credits
+### - Sai Vignesh 
+GitHub: @saivignesh45
+
+Mail: saivignesh742@gmail.com
+
+### - Gokulramanan 
+GitHub: @Feininon 
+
+Mail: gokulramananvec@gmail.com
