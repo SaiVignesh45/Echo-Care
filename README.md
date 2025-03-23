@@ -86,7 +86,7 @@ Python version used in development: 3.12.6
 ## Code Components:
 
 **1. get_user_files**  
-*Workflow Steps*:  
+   
 1. Triggered when needing user-specific file paths  
 2. Retrieves current_user.id from active session  
 3. Constructs FAISS index path: `faiss_indexes/faiss_index_{user_id}.index`  
@@ -105,7 +105,7 @@ graph TD
 ---
 
 **2. load_faiss_store**  
-*Workflow Steps*:  
+   
 1. Called when initializing chat session  
 2. Checks if FAISS index file exists for user  
 3. If exists: Loads binary index file using faiss.read_index()  
@@ -124,7 +124,7 @@ graph TD
 ---
 
 **3. store_vector_message**  
-*Workflow Steps*:  
+   
 1. Receives message text, role (user/bot), and FAISS index  
 2. Cleans text by removing extra whitespace  
 3. Generates embedding using OllamaEmbeddings  
@@ -142,7 +142,7 @@ graph TD
 ---
 
 **4. retrieve_context**  
-*Workflow Steps*:  
+   
 1. Takes user query and FAISS index as input  
 2. Generates query embedding using OllamaEmbeddings  
 3. Performs FAISS similarity search for top_k neighbors  
@@ -164,7 +164,7 @@ graph TD
 ---
 
 **5. User Authentication Flow**  
-*Workflow Steps*:  
+   
 1. User submits credentials via form  
 2. System checks MongoDB for username  
 3. If new user: Hashes password with bcrypt and creates record  
@@ -186,7 +186,7 @@ graph TD
 ---
 
 **6. chat Endpoint**  
-*Workflow Steps*:  
+   
 1. Receives POST request with user message  
 2. Checks for crisis keywords using detect_crisis()  
 3. If crisis detected: Returns emergency response template  
@@ -211,7 +211,7 @@ graph TD
 ---
 
 **7. detect_crisis**  
-*Workflow Steps*:  
+   
 1. Converts message to lowercase  
 2. Iterates through CRISIS_KEYWORDS list  
 3. Checks if any keyword exists in message  
@@ -229,7 +229,7 @@ graph TD
 ---
 
 **8. generate_response**  
-*Workflow Steps*:  
+   
 1. Combines system prompt and retrieved context  
 2. Formats full prompt template:  
    ```
